@@ -1,0 +1,43 @@
+#!/bin/bash -e
+#
+#          _               __    
+#    _  __(_)_____ _____ _/ /  __
+#   | |/ / / __/ // / _ `/ / |/ /
+#   |___/_/_/  \_,_/\_,_/_/|___/ 
+#
+# a replace /bin/rm with /bin/mv tool
+#
+
+TRASH_PATH=$HOME/.Trash/
+
+if [ $# -ge 2 ];then
+    if [[ $1 = "-r" ]] || [[ $1 = "-Rf" ]] || [[ $1 = "-R" ]] || [[ $1 = "-rf" ]];then
+        shift
+    else
+        if [[ $(file $* | awk -F: '{print $2}' | sed "s/ //g") =~ "directory" ]];then
+            echo "directory need -r"
+            exit 3
+        fi
+    fi
+elif [[ "$1" =~ ^-.* ]];then
+    echo "-----**********************----- normal option -----**********************-----"
+    echo ""
+    /bin/mv $1
+    echo ""
+    echo "-----**********************----- dangerous option -----**********************-----"
+    echo ""
+    /bin/rm $1
+    echo ""
+    exit 2
+elif [[ $(file $1 | awk -F: '{print $2}') =~ "directory" ]];then
+        echo "directory need -r argument"
+        exit 3
+fi
+
+for PER_THING in $*;do
+    if [ ! -e "$PER_THING" ];then
+        echo "$PER_THING is not exist"
+        continue
+    fi
+    /bin/mv -f $PER_THING $TRASH_PATH
+done
